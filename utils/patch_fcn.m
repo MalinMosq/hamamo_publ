@@ -1,11 +1,11 @@
-function [u_global,u_global_bubble,u_global_enh_loc] = patch_fcn(A_global,b_global,A0,A1,...
+function [u_global,u_global_enh_loc] = patch_fcn(A_global,b_global,A0,A1,...
     p,p_inter_logical,p_boundary_logical,...
-    e,e_inter,e_coarse,t,t_coarse,lod_logical,lod_bubble_logical,lod_enh_loc_logical,ell)
+    e,e_inter,e_coarse,t,t_coarse,lod_logical,lod_enh_loc_logical,ell)
 % M. Hauck, A. Målqvist, M. Mosquera, 2026
 % A LOCALIZED ORTHOGONAL DECOMPOSITION METHOD FOR HETEROGENEOUS MIXED-DIMENSIONAL PROBLEMS
 
 % Initiate (global) solution vectors in order to not omit an output argument
-u_global = []; u_global_bubble = []; u_global_enh_loc = [];
+u_global = []; u_global_enh_loc = [];
 
 n_tri = size(t_coarse,2); n_edg = size(e_coarse,2);
 n = n_tri + n_edg;
@@ -75,7 +75,6 @@ if lod_enh_loc_logical
 end
 
 if lod_logical, Phi = zeros(size(A_global,1),0); Phi_time = 0; end
-if lod_bubble_logical, Phi_bubble = zeros(size(A_global,1),0); Phi_bubble_time = 0; end
 if lod_enh_loc_logical
     Phi_enh_loc = sparse([],[],[],size(A_global,1),n_edg+n_tri);
     Kv = sparse([],[],[],size(A_global,1),n_edg+n_tri);
@@ -180,13 +179,6 @@ for j = 1:size(patches,1)
     Phi(occurring_points,end+1) = lod_basis_fcn(A_patch,C_patch,...
         p_boundary_logical_patch,e_inter_patch,e_coarse_patch,middle_ind);
     end
-
-    % ------------------ LOD Bubble functions -------------------
-    if lod_bubble_logical
-    Phi_bubble(occurring_points,end+1) = lod_basis_fcn_bubble(A_patch,...
-        p_patch,p_boundary_logical_patch,...
-        e_patch,e_inter_patch,e_coarse_patch,t_patch,t_coarse_patch,middle_ind);
-    end
     % --------------- LOD enhanced localisation -----------------
     if lod_enh_loc_logical
         if j > n_edg
@@ -237,14 +229,6 @@ if lod_logical
 end
 %save('lod_basis_h6_H2_B1_ell4','Phi','p','e','t','p_boundary_logical','e_coarse','t_coarse','-v7.3')
 
-if lod_bubble_logical
-    % Solution LOD with bubble functions
-    A_bubble = Phi_bubble'*(A_global*Phi_bubble);
-    b_bubble = Phi_bubble'*b_global;
-    u_bubble = A_bubble\b_bubble;
-    u_global_bubble = Phi_bubble*u_bubble;
-end
-
 if lod_enh_loc_logical
     % Add I_H 1_S to every column
     % 1_S-matrix
@@ -274,6 +258,6 @@ if lod_enh_loc_logical
 end % if
 
 % figure()
-% h = plot_solution(p,e,t,Phi_bubble(:,100));
+% h = plot_solution(p,e,t,Phi_enh_loc(:,100));
 
 end

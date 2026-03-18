@@ -55,7 +55,7 @@ end
 
 
 %% Pose problem on geometry and solve it
-clc
+clc, format long
 disp('--------------- Pose problem and solve ---------------')
 addpath utils/
 tol = 1e-8;

@@ -54,19 +54,17 @@ parfor j = 0:H % 0:H
         e_inter,t,quad_p);
 
     lod_logical = 0;
-    lod_bubble_logical = 0;
     lod_enh_loc_logical = 1;
     if lod_logical, u_lod = zeros(size(A,1),max_ell); end
-    if lod_bubble_logical, u_lod_bubble = zeros(size(A,1),max_ell); end
     if lod_enh_loc_logical, u_lod_enh_loc = zeros(size(A,1),max_ell); end
 
     tmp = zeros(1,max_ell);
     for i = 1:max_ell % for i = j
         ell = i;
         disp(['Layers = ',num2str(ell)])
-        [~,~,u_lod_enh_loc(:,i)] = patch_fcn(A,b,A0,A1, ... % u_lod(:,i), u_lod_bubble(:,i), u_lod_enh_loc(:,i)
+        [~,u_lod_enh_loc(:,i)] = patch_fcn(A,b,A0,A1, ... % u_lod(:,i), u_lod_enh_loc(:,i)
             p,p_inter_logical,p_boundary_logical,e,e_inter,e_coarse, ...
-            t,t_coarse,lod_logical,lod_bubble_logical,lod_enh_loc_logical,ell);
+            t,t_coarse,lod_logical,lod_enh_loc_logical,ell);
         tmp(i) = norm_diff(u_fem, u_lod_enh_loc(:,i), A, M);
         %disp([i,j,energy_error_fem_lod])
     end
