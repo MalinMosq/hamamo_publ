@@ -9,15 +9,15 @@ A0 = @(x,y) 1 + 0*x; %sin(x.*y);
 A1 = @(x,y) 1 + 0*x; %sin(30*pi*x).*sin(30*pi*y) + 2;
 A1_cell = {A1};
 
-% % A0 = p.w. constant on fine mesh, random between [0.01,1]
-% grid = 0:1/2^h/6:1; rand_mat = .99*rand(length(grid(1:end-1))) + 0.01;
-% A0 = @(x,y) rand_mat(find((x >= grid(1:end-1)).*(x < grid(2:end))),find((y >= grid(1:end-1)).*(y < grid(2:end))));
+% A0 = p.w. constant on fine mesh, random between [0.01,1]
+grid = 0:1/2^h/6:1; rand_mat = .99*rand(length(grid(1:end-1))) + 0.01;
+A0 = @(x,y) rand_mat(find((x >= grid(1:end-1)).*(x < grid(2:end))),find((y >= grid(1:end-1)).*(y < grid(2:end))));
 
 % rand_v = .99*rand(1,150000) + 0.01;
 % A0 = .99*rand(1,150000) + 0.01; % ones(1,150000); %
 % %A1_v = .99*rand(1,150000) + 0.01; % ones(1,150000); %
 
-B1 = @(x,y) 1;
+B1 = @(x,y) 100;
 f_bulk = @(x,y) sin(pi*x).*sin(pi*y); % 1 + 0*x; % sin(30*pi*x).*sin(pi*y);
 f_interface = @(x,y) x + 2*y; % sin(30*pi*x).*sin(pi*y); %1 + 0*x;
 
@@ -28,7 +28,7 @@ max_ell = 4;
 energy_error_fem_lod = zeros(H+1,max_ell);
 
 for i_cell = 1:length(A1_cell)
-parfor j = 0:H % 0:H
+for j = 0:H % 0:H
     % ------------------- Data structure ------------------
     A1 = A1_cell{i_cell};
 
@@ -62,20 +62,26 @@ parfor j = 0:H % 0:H
     for i = 1:max_ell % for i = j
         ell = i;
         disp(['Layers = ',num2str(ell)])
-        [~,u_lod_enh_loc(:,i)] = patch_fcn(A,b,A0,A1, ... % u_lod(:,i), u_lod_enh_loc(:,i)
+        [~,u_lod_enh_loc(:,i),Phi_enh_loc,u_enh_loc] = patch_fcn(A,b,A0,A1,B1,... % u_lod(:,i), u_lod_enh_loc(:,i)
             p,p_inter_logical,p_boundary_logical,e,e_inter,e_coarse, ...
             t,t_coarse,lod_logical,lod_enh_loc_logical,ell);
         tmp(i) = norm_diff(u_fem, u_lod_enh_loc(:,i), A, M);
         %disp([i,j,energy_error_fem_lod])
     end
     energy_error_fem_lod(j+1,:) = tmp;
+
+    sum(abs(u_enh_loc - Phi_enh_loc\u_fem))
+
+    u_diff = Phi_enh_loc*(u_enh_loc - Phi_enh_loc\u_fem);
+    u_diff'*A*u_diff
     
-    % plot_solution_comp(p,e,t,e_coarse,t_coarse,u_fem,u_lod_enh_loc(:,level_patches),'FEM solution','LOD solution, enhanced localisation');
+    % plot_solution_comp(p,e,t,e_coarse,t_coarse,u_fem,u_lod_enh_loc(:,level_patches),'FEM solution','LOD solution');
 
 end
 end
 energy_error_fem_lod
-
+plot_solution_comp(p,e,t,e_coarse,t_coarse,u_fem,u_lod_enh_loc(:,max_ell),'FEM solution','LOD solution');
+%plot_solution(p,e,t,Phi_enh_loc*(Phi_enh_loc\u_fem) - u_lod_enh_loc(:,i));
 end
 
 

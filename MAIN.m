@@ -235,5 +235,5 @@ H = 1;
 [p,e,t,p_inter_logical,p_boundary_logical,e_inter,e_coarse,t_coarse] = ...
     read_variables(h,H,tol);
 plot_network(p,e_coarse,t_coarse);
-exportgraphics(gca,'figures/domain_complicated1.1.png')
+%exportgraphics(gca,'figures/domain_complicated1.1.png')
 

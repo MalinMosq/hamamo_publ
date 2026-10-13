@@ -1,4 +1,4 @@
-function [phi,A_T,C_T] = lod_basis_fcn_enh_loc(A,C,Ai,Aj,p,p_inter_logical,p_boundary_logical,p_global_boundary_logical,...
+function [phi,A_T,C_T] = lod_basis_fcn_enh_loc(A,C,Ai,Aj,Bj,p,p_inter_logical,p_boundary_logical,p_global_boundary_logical,...
     e,e_inter,e_coarse,t,t_coarse,j,I,val,I_H)
 % M. Hauck, A. Målqvist, M. Mosquera, 2026
 % A LOCALIZED ORTHOGONAL DECOMPOSITION METHOD FOR HETEROGENEOUS MIXED-DIMENSIONAL PROBLEMS
@@ -54,8 +54,8 @@ else
     e_T = (sum(ismember(e_coarse(1:2,e_inter(3,:)),p(4,T))) == 2);
     Aj_T = Aj*1/2.*e_T;
 end
-Bj = @(x,y) 1/2*inpolygon(x,y,p(1,T),p(2,T));
-[A00_T,A01_T,A10_T,A11_T] = A_fcn(Ai_T,Aj_T,Bj,p,p_inter_logical,p_boundary_logical,e_inter,t,2);
+Bj_T = @(x,y) 1/2*inpolygon(x,y,p(1,T),p(2,T)).*Bj(x,y);
+[A00_T,A01_T,A10_T,A11_T] = A_fcn(Ai_T,Aj_T,Bj_T,p,p_inter_logical,p_boundary_logical,e_inter,t,2);
 A00_T(p_boundary_logical(~p_inter_logical),p_boundary_logical(~p_inter_logical)) = 0;
 A_T = [A00_T,A01_T;A10_T,A11_T];
 
